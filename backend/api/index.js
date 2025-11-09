@@ -74,10 +74,15 @@ app.get('/', (req, res) => {
   });
 });
 
-// Rotas da API
+// Rotas da API (com prefixo /api)
 app.use('/api/products', productsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/auth', authRoutes);
+
+// Rotas da API (sem prefixo /api para compatibilidade)
+app.use('/products', productsRoutes);
+app.use('/categories', categoriesRoutes);
+app.use('/auth', authRoutes);
 
 // Rota 404
 app.use((req, res) => {

@@ -83,8 +83,8 @@ Deve retornar:
 No projeto Frontend, vá em **Settings** → **Environment Variables**:
 
 ```bash
-# API Backend (URL do deploy acima)
-VITE_API_URL=https://ecommerce-hair-backend.vercel.app
+# API Backend (URL do deploy acima - COM /api no final)
+VITE_API_URL=https://ecommerce-hair-backend.vercel.app/api
 
 # Supabase
 VITE_SUPABASE_URL=https://hyivpxxuoschkezzglty.supabase.co
@@ -93,6 +93,8 @@ VITE_SUPABASE_ANON_KEY=sua-anon-key-aqui
 # Site
 VITE_SITE_NAME=FabHair
 ```
+
+**IMPORTANTE:** A URL do backend deve terminar com `/api`
 
 ### 3. Redeploy
 
@@ -114,13 +116,15 @@ VITE_SITE_NAME=FabHair
 ### 2. Configurar Environment Variables
 
 ```bash
-# API Backend
-VITE_API_URL=https://ecommerce-hair-backend.vercel.app
+# API Backend (COM /api no final)
+VITE_API_URL=https://ecommerce-hair-backend.vercel.app/api
 
 # Supabase
 VITE_SUPABASE_URL=https://hyivpxxuoschkezzglty.supabase.co
 VITE_SUPABASE_ANON_KEY=sua-anon-key-aqui
 ```
+
+**IMPORTANTE:** A URL do backend deve terminar com `/api`
 
 ### 3. Redeploy
 
@@ -141,6 +145,31 @@ Depois de deployar Frontend e Admin, você terá as URLs finais. Se forem difere
 ---
 
 ## Troubleshooting
+
+### Erro 404 - Rotas não encontradas
+
+**Sintomas:**
+```
+GET .../categories 404 (Not Found)
+GET .../products/featured 404 (Not Found)
+```
+
+**Solução:**
+A variável `VITE_API_URL` no Frontend/Admin está configurada incorretamente.
+
+**Correto:**
+```
+VITE_API_URL=https://ecommerce-hair-backend.vercel.app/api
+```
+
+**Incorreto:**
+```
+VITE_API_URL=https://ecommerce-hair-backend.vercel.app
+```
+
+Note o `/api` no final! Após corrigir, faça redeploy do Frontend/Admin.
+
+---
 
 ### Erro CORS no Frontend
 
