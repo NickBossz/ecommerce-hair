@@ -88,33 +88,20 @@ Possíveis causas:
 
 3. **RLS bloqueou** - As políticas RLS podem ter bloqueado o insert
 
-## Prevenir no Futuro: Criar Trigger Automático
+## ⚠️ IMPORTANTE: Prevenir no Futuro
 
-Para garantir que todo usuário no auth tenha perfil, crie este trigger:
+Para garantir que todo usuário no auth tenha perfil automaticamente, execute o arquivo **auto-create-profiles.sql** no SQL Editor do Supabase.
 
-```sql
--- Função para criar perfil automaticamente
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
-BEGIN
-  INSERT INTO public.user_profiles (id, email, full_name, role)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Usuário'),
-    'customer'
-  )
-  ON CONFLICT (id) DO NOTHING;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+Esse script cria um **trigger automático** que:
+- Detecta quando um novo usuário é criado no `auth.users`
+- Cria automaticamente o perfil em `user_profiles` com role 'customer'
+- Também cria perfis para usuários antigos que não têm
 
--- Trigger que executa quando usuário é criado no auth
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-```
+**Como executar:**
+1. Acesse: https://supabase.com/dashboard/project/hyivpxxuoschkezzglty/sql/new
+2. Copie todo o conteúdo do arquivo `auto-create-profiles.sql`
+3. Cole no SQL Editor
+4. Clique em **Run**
 
 Agora, sempre que um usuário for criado no Auth, o perfil será criado automaticamente na tabela `user_profiles`!
 
