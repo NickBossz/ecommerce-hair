@@ -19,7 +19,7 @@
     "build:frontend": "npm run build --workspace=frontend",
     "build:admin": "npm run build --workspace=paineladmin",
     "install:all": "npm install",
-    "db:setup": "node apply-schema.js",
+    "db:seed": "node seed-database.js",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
     "clean:backend": "cd backend && rm -rf node_modules dist",
     "clean:frontend": "cd frontend && rm -rf node_modules dist",

@@ -65,6 +65,9 @@ cp .env.example frontend/.env
 cp .env.example paineladmin/.env
 # Editar arquivos .env com credenciais Supabase
 
+# Popular banco com dados de exemplo (opcional)
+npm run db:seed
+
 # Desenvolvimento
 npm run dev:backend    # Express server :3000
 npm run dev:frontend   # Vite dev server :5173
@@ -73,6 +76,16 @@ npm run dev:admin      # Vite dev server :5174
 # Build
 npm run build          # Build all workspaces
 ```
+
+### Seed Database
+
+O comando `npm run db:seed` insere dados de exemplo:
+- 4 categorias de produtos
+- 12 produtos (shampoos, condicionadores, máscaras, finalizadores)
+- Imagens de produtos
+- 8 produtos marcados como destaque
+
+**Nota:** Configure a senha do banco em `seed-database.js` antes de executar.
 
 ## API Endpoints
 

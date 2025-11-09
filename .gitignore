@@ -22,6 +22,7 @@ build/
 
 # Database credentials
 node.js
+seed-database.js
 
 # Logs
 logs/
