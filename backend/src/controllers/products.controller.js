@@ -158,14 +158,19 @@ export const getFeaturedProducts = async (req, res) => {
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erro Supabase ao buscar produtos featured:', error);
+      throw error;
+    }
 
-    res.json({ products });
+    // Retornar array vazio se não houver produtos
+    res.json({ products: products || [] });
   } catch (error) {
     console.error('Erro ao buscar produtos em destaque:', error);
     res.status(500).json({
       error: 'Erro ao buscar produtos',
-      message: error.message
+      message: error.message,
+      details: error.details || error.hint || 'Verifique se as tabelas foram criadas no Supabase'
     });
   }
 };

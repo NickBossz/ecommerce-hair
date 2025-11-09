@@ -13,7 +13,7 @@ export const config = {
   },
 
   cors: {
-    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174']
+    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || ['http://localhost:5173', 'http://localhost:5174']
   },
 
   upload: {

@@ -14,9 +14,27 @@ const app = express();
 
 // Middlewares de segurança
 app.use(helmet());
+
+// CORS configurado dinamicamente
 app.use(cors({
-  origin: config.cors.allowedOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    // Permitir requisições sem origin (mobile apps, curl, etc)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = config.cors.allowedOrigins;
+    console.log('🌐 CORS - Origin:', origin);
+    console.log('✅ CORS - Allowed:', allowedOrigins);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS bloqueado para origem:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate limiting
@@ -36,7 +54,8 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: config.nodeEnv
+    environment: config.nodeEnv,
+    allowedOrigins: config.cors.allowedOrigins
   });
 });
 

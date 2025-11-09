@@ -13,7 +13,15 @@ export const listCategories = async (req, res) => {
       .is('parent_id', null)
       .order('display_order', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erro Supabase ao listar categorias:', error);
+      throw error;
+    }
+
+    // Se não houver categorias, retornar array vazio
+    if (!categories || categories.length === 0) {
+      return res.json({ categories: [] });
+    }
 
     // Adicionar contagem de produtos
     const categoriesWithCount = await Promise.all(
@@ -36,7 +44,8 @@ export const listCategories = async (req, res) => {
     console.error('Erro ao listar categorias:', error);
     res.status(500).json({
       error: 'Erro ao listar categorias',
-      message: error.message
+      message: error.message,
+      details: error.details || error.hint || 'Verifique se as tabelas foram criadas no Supabase'
     });
   }
 };
