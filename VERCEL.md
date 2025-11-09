@@ -98,6 +98,12 @@ VITE_SITE_NAME=FabHair
 
 ### 3. Redeploy
 
+**IMPORTANTE:** Faça um **Clean Redeploy** para garantir React 18:
+
+1. Vá em **Deployments**
+2. Clique nos 3 pontos do último deployment
+3. **Redeploy** → Marque **"Clear cache and redeploy"**
+
 ---
 
 ## Painel Admin
@@ -127,6 +133,16 @@ VITE_SUPABASE_ANON_KEY=sua-anon-key-aqui
 **IMPORTANTE:** A URL do backend deve terminar com `/api`
 
 ### 3. Redeploy
+
+**CRÍTICO - Erro React 19:** Faça um **Clean Redeploy** para garantir React 18:
+
+1. Vá em **Deployments**
+2. Clique nos 3 pontos (`...`) do último deployment
+3. Clique em **Redeploy**
+4. ✅ **MARQUE** a opção **"Clear cache and redeploy"**
+5. Confirme
+
+Isso força a Vercel a instalar React 18.3.1 (corrige erro `Cannot read properties of null reading 'useState'`)
 
 ---
 
@@ -168,6 +184,27 @@ VITE_API_URL=https://ecommerce-hair-backend.vercel.app
 ```
 
 Note o `/api` no final! Após corrigir, faça redeploy do Frontend/Admin.
+
+---
+
+### Erro React useState no Admin (MAIS COMUM)
+
+**Sintomas:**
+```
+Cannot read properties of null (reading 'useState')
+TypeError: Cannot read properties of null
+```
+
+**Causa:**
+Vercel está usando cache com React 19 (incompatível).
+
+**Solução:**
+1. Acesse o projeto Admin na Vercel
+2. **Deployments** → Clique nos 3 pontos do último deploy
+3. **Redeploy** → ✅ **MARQUE "Clear cache and redeploy"**
+4. Aguarde novo build completar
+
+Isso força instalação do React 18.3.1.
 
 ---
 
