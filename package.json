@@ -1,0 +1,44 @@
+{
+  "name": "@ecommerce/monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E-commerce monorepo com Backend, Frontend e Painel Admin",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "paineladmin"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:admin": "npm run dev --workspace=paineladmin",
+    "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:admin": "npm run build --workspace=paineladmin",
+    "install:all": "npm install",
+    "db:setup": "node apply-schema.js",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "clean:backend": "cd backend && rm -rf node_modules dist",
+    "clean:frontend": "cd frontend && rm -rf node_modules dist",
+    "clean:admin": "cd paineladmin && rm -rf node_modules dist"
+  },
+  "keywords": [
+    "ecommerce",
+    "monorepo",
+    "react",
+    "express",
+    "supabase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}

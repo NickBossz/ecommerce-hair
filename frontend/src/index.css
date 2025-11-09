@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+
+    --primary: 330 85% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 330 15% 95%;
+    --secondary-foreground: 330 85% 52%;
+
+    --muted: 330 10% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 160 85% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 330 15% 90%;
+    --input: 330 15% 90%;
+    --ring: 330 85% 52%;
+
+    --radius: 0.75rem;
+
+    /* Brand gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(330 85% 52%), hsl(340 85% 62%));
+    --gradient-hero: linear-gradient(135deg, hsl(330 85% 52%) 0%, hsl(340 85% 62%) 50%, hsl(350 80% 70%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(330 15% 98%));
+    
+    /* Shadows */
+    --shadow-pink: 0 10px 40px -10px hsl(330 85% 52% / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(330 20% 20% / 0.1);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 330 15% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 330 15% 10%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 330 15% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 330 85% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 330 20% 20%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 330 20% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 160 85% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 330 20% 20%;
+    --input: 330 20% 20%;
+    --ring: 330 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
