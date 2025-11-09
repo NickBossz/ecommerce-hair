@@ -103,34 +103,54 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: window.location.origin,
         },
       });
 
       if (error) {
+        console.error('Erro do Supabase auth.signUp:', error);
         return { error };
       }
 
-      // Criar perfil do usuário
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert([
-            {
-              id: data.user.id,
-              full_name: fullName,
-              role: 'customer',
-            },
-          ]);
+      // Verificar se o usuário foi criado
+      if (!data.user) {
+        return {
+          error: {
+            message: 'Erro ao criar usuário. Verifique as configurações de email no Supabase.',
+            name: 'SignUpError',
+            status: 400
+          } as AuthError
+        };
+      }
 
-        if (profileError) {
-          console.error('Erro ao criar perfil:', profileError);
-        }
+      // Criar perfil do usuário
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .insert([
+          {
+            id: data.user.id,
+            full_name: fullName,
+            email: email,
+            role: 'customer',
+          },
+        ]);
+
+      if (profileError) {
+        console.error('Erro ao criar perfil:', profileError);
+        // Não retornar erro aqui pois o usuário já foi criado
+        // O perfil pode ser criado depois via trigger ou manualmente
       }
 
       return { error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no cadastro:', error);
-      return { error: error as AuthError };
+      return {
+        error: {
+          message: error?.message || 'Erro ao criar conta. Tente novamente.',
+          name: 'SignUpError',
+          status: error?.status || 500
+        } as AuthError
+      };
     } finally {
       setLoading(false);
     }
