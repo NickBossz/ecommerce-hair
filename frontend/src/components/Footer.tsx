@@ -123,24 +123,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Pagamento e Segurança */}
-        <div className="border-t border-border pt-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center md:text-left">
-            <div>
-              <h5 className="font-semibold text-foreground mb-3">Formas de Pagamento</h5>
-              <p className="text-sm text-muted-foreground">
-                Cartão de Crédito, Pix, Boleto Bancário
-              </p>
-            </div>
-            <div>
-              <h5 className="font-semibold text-foreground mb-3">Compra Segura</h5>
-              <p className="text-sm text-muted-foreground">
-                Site protegido com certificado SSL
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Copyright */}
         <div className="border-t border-border pt-6 text-center">
           <p className="text-sm text-muted-foreground">

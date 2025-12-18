@@ -21,12 +21,8 @@ const SiteSettings = () => {
       setLoading(true);
       const response = await api.get('/settings');
 
-      const settingsObj = {};
-      (response.data || []).forEach(setting => {
-        settingsObj[setting.key] = setting.value || '';
-      });
-
-      setSettings(settingsObj);
+      // Backend returns an object directly, not an array
+      setSettings(response.data || {});
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
       toast.error('Erro ao carregar configurações');
