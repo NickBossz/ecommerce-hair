@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroCarousel from "@/components/HeroCarousel";
+import ProductCarousel from "@/components/ProductCarousel";
 import BenefitsSection from "@/components/BenefitsSection";
 import ProductsSection from "@/components/ProductsSection";
 import Footer from "@/components/Footer";
@@ -10,6 +11,7 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroCarousel />
+        <ProductCarousel />
         <ProductsSection />
         <BenefitsSection />
       </main>
