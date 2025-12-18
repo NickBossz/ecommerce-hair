@@ -86,6 +86,59 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 })
 
+// GET /products/slug/:slug - Get product by slug
+router.get('/slug/:slug', optionalAuth, async (req, res) => {
+  try {
+    const { slug } = req.params
+
+    const products = await getCollection('products')
+    const query = { slug }
+
+    // Only show active products to non-admin users
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
+      query.is_active = true
+    }
+
+    const product = await products.findOne(query)
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+
+    // Get images
+    const productImages = await getCollection('product_images')
+    const images = await productImages
+      .find({ product_id: product._id })
+      .sort({ display_order: 1 })
+      .toArray()
+
+    // Get category
+    const categories = await getCollection('categories')
+    const category = product.category_id
+      ? await categories.findOne({ _id: product.category_id })
+      : null
+
+    res.json({
+      product: {
+        ...product,
+        id: product._id,
+        images: images.map(img => ({
+          ...img,
+          id: img._id
+        })),
+        category: category ? {
+          id: category._id,
+          name: category.name,
+          slug: category.slug
+        } : null
+      }
+    })
+  } catch (error) {
+    console.error('Get product by slug error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // GET /products/:id - Get single product
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
