@@ -2,5 +2,7 @@
 import express from 'express'
 import app from './lib/app.js'
 
-// Export the Express app as the default export
-export default app
+// Export as serverless function handler
+export default (req, res) => {
+  return app(req, res)
+}
