@@ -30,7 +30,7 @@ const ProductsSection = () => {
   const fetchProducts = async () => {
     try {
       setError(false);
-      const response = await api.get('/products/featured?limit=4');
+      const response = await api.get('/products?featured=true&limit=4');
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Erro ao buscar produtos em destaque:', error);
