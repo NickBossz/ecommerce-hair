@@ -36,8 +36,18 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await axios.get(`${apiUrl}/auth/verify`);
-        setUser(response.data.user);
+        const response = await axios.get(`${apiUrl}/auth/me`);
+        const userData = response.data;
+
+        // Verificar se é admin
+        if (userData.role !== 'admin' && userData.role !== 'superadmin') {
+          console.error('Usuário não é admin');
+          logout();
+          setLoading(false);
+          return;
+        }
+
+        setUser(userData);
       } catch (error) {
         console.error('Sessão inválida:', error);
         logout();
@@ -51,16 +61,24 @@ export const AuthProvider = ({ children }) => {
 
   const loginAdmin = async (email, password) => {
     try {
-      const response = await axios.post(`${apiUrl}/auth/login/admin`, {
+      const response = await axios.post(`${apiUrl}/auth/login`, {
         email,
         password
       });
 
-      const { user, session } = response.data;
+      const { user, token: authToken } = response.data;
+
+      // Verificar se o usuário é admin
+      if (user.role !== 'admin' && user.role !== 'superadmin') {
+        return {
+          success: false,
+          error: 'Acesso negado. Apenas administradores podem acessar.'
+        };
+      }
 
       setUser(user);
-      setToken(session.access_token);
-      localStorage.setItem('admin_token', session.access_token);
+      setToken(authToken);
+      localStorage.setItem('admin_token', authToken);
       localStorage.setItem('admin_user', JSON.stringify(user));
 
       return { success: true };
@@ -68,7 +86,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Erro no login:', error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Erro ao fazer login'
+        error: error.response?.data?.error || 'Erro ao fazer login'
       };
     }
   };
