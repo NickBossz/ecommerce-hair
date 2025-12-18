@@ -4,97 +4,65 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import api from "@/services/api";
 
-interface Category {
+interface Product {
   id: string;
   name: string;
   slug: string;
-  image_url?: string;
-  description?: string;
-}
-
-interface Slide {
-  id: string;
-  image: string;
-  title: string;
-  description: string;
-  categorySlug: string;
+  price: number;
+  compare_at_price?: number;
+  images: Array<{ image_url: string; is_primary: boolean }>;
 }
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [slides, setSlides] = useState<Slide[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchCategories();
+    fetchProducts();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchProducts = async () => {
     try {
-      const response = await api.get('/categories');
-      const categories: Category[] = response.data.categories || [];
+      const response = await api.get('/products?limit=12');
+      const allProducts: Product[] = response.data.products || [];
 
-      // Criar slides a partir das categorias
-      const categorySlides = categories.slice(0, 5).map((category) => ({
-        id: category.id,
-        image: category.image_url || "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
-        title: category.name.toUpperCase(),
-        description: category.description || `Confira nossa coleção exclusiva de ${category.name.toLowerCase()} com os melhores produtos para realçar sua beleza!`,
-        categorySlug: category.slug,
-      }));
-
-      setSlides(categorySlides);
+      // Randomizar e pegar 5 produtos para o carrossel
+      const shuffled = allProducts.sort(() => Math.random() - 0.5);
+      setProducts(shuffled.slice(0, 5));
     } catch (error) {
-      console.error('Erro ao buscar categorias:', error);
-      // Fallback para slides padrão
-      setSlides([
-        {
-          id: "1",
-          image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
-          title: "PRODUTOS EXCLUSIVOS",
-          description: "Descubra nossa seleção especial de produtos com qualidade garantida e os melhores preços!",
-          categorySlug: "todos",
-        },
-        {
-          id: "2",
-          image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800",
-          title: "NOVIDADES",
-          description: "Confira os lançamentos mais recentes e fique por dentro das tendências!",
-          categorySlug: "novidades",
-        },
-        {
-          id: "3",
-          image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800",
-          title: "OFERTAS ESPECIAIS",
-          description: "Aproveite nossas promoções e garanta produtos incríveis com descontos exclusivos!",
-          categorySlug: "ofertas",
-        },
-      ]);
+      console.error('Erro ao buscar produtos:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const getPrimaryImage = (product: Product) => {
+    const primaryImage = product.images?.find(img => img.is_primary);
+    return primaryImage?.image_url || product.images?.[0]?.image_url || "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800";
+  };
+
   useEffect(() => {
-    if (slides.length > 0) {
+    if (products.length > 0) {
       const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-      }, 5000);
+        setCurrentSlide((prev) => (prev + 1) % products.length);
+      }, 4000);
       return () => clearInterval(timer);
     }
-  }, [slides.length]);
+  }, [products.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % products.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + products.length) % products.length);
   };
 
-  const handleSlideClick = (categorySlug: string) => {
-    navigate(`/shop?category=${categorySlug}`);
+  const handleProductClick = (slug: string) => {
+    navigate(`/product/${slug}`);
   };
 
   if (loading) {
@@ -110,9 +78,9 @@ const HeroCarousel = () => {
   return (
     <div className="relative w-full overflow-hidden bg-gradient-hero">
       <div className="relative h-[400px] md:h-[600px]">
-        {slides.map((slide, index) => (
+        {products.map((product, index) => (
           <div
-            key={slide.id}
+            key={product.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
@@ -120,19 +88,31 @@ const HeroCarousel = () => {
             <div className="grid md:grid-cols-2 h-full">
               {/* Text Content */}
               <div className="flex flex-col justify-center px-6 md:px-12 lg:px-20 py-8 animate-fade-in">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-4 leading-tight">
-                  {slide.title}
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 leading-tight">
+                  {product.name}
                 </h1>
-                <p className="text-base md:text-lg text-primary-foreground/80 mb-8 max-w-xl leading-relaxed">
-                  {slide.description}
-                </p>
+
+                <div className="mb-6">
+                  {product.compare_at_price && (
+                    <p className="text-lg text-primary-foreground/70 line-through mb-2">
+                      De: R$ {product.compare_at_price.toFixed(2)}
+                    </p>
+                  )}
+                  <p className="text-4xl md:text-5xl font-bold text-primary-foreground">
+                    R$ {product.price.toFixed(2)}
+                  </p>
+                  <p className="text-sm text-primary-foreground/80 mt-2">
+                    ou 3x de R$ {(product.price / 3).toFixed(2)}
+                  </p>
+                </div>
+
                 <div>
                   <Button
                     variant="hero"
                     size="xl"
-                    onClick={() => handleSlideClick(slide.categorySlug)}
+                    onClick={() => handleProductClick(product.slug)}
                   >
-                    VER PRODUTOS
+                    VER DETALHES
                   </Button>
                 </div>
               </div>
@@ -140,8 +120,8 @@ const HeroCarousel = () => {
               {/* Image */}
               <div className="relative hidden md:block">
                 <img
-                  src={slide.image}
-                  alt={slide.title}
+                  src={getPrimaryImage(product)}
+                  alt={product.name}
                   className="absolute inset-0 w-full h-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-primary/20" />
@@ -152,7 +132,7 @@ const HeroCarousel = () => {
       </div>
 
       {/* Navigation Buttons */}
-      {slides.length > 1 && (
+      {products.length > 1 && (
         <>
           <Button
             variant="ghost"
@@ -173,7 +153,7 @@ const HeroCarousel = () => {
 
           {/* Dots Indicator */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((_, index) => (
+            {products.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
@@ -182,7 +162,7 @@ const HeroCarousel = () => {
                     ? "bg-primary-foreground w-8"
                     : "bg-primary-foreground/50"
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
+                aria-label={`Ver produto ${index + 1}`}
               />
             ))}
           </div>
