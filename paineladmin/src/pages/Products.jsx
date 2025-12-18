@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Pencil, Trash2, Search, Image as ImageIcon, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '@/services/supabase';
 
 const Products = () => {
   const [products, setProducts] = useState([]);

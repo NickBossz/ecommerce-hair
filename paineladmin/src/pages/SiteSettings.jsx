@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save, Settings, MapPin, Phone, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '@/services/supabase';
+import api from '@/services/api';
 
 const SiteSettings = () => {
   const [loading, setLoading] = useState(true);
@@ -19,15 +19,10 @@ const SiteSettings = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('*');
-
-      if (error) throw error;
+      const response = await api.get('/settings');
 
       const settingsObj = {};
-      data.forEach(setting => {
-        // O Supabase já retorna o JSONB parseado automaticamente
+      (response.data || []).forEach(setting => {
         settingsObj[setting.key] = setting.value || '';
       });
 
@@ -49,25 +44,13 @@ const SiteSettings = () => {
     setSaving(true);
 
     try {
-      const updates = Object.entries(settings).map(([key, value]) => ({
-        key,
-        value: value, // Supabase converte automaticamente para JSONB
-        updated_at: new Date().toISOString()
-      }));
-
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('site_settings')
-          .upsert(update, { onConflict: 'key' });
-
-        if (error) throw error;
-      }
+      await api.put('/settings', settings);
 
       toast.success('Configurações salvas com sucesso!');
       fetchSettings();
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
-      toast.error('Erro ao salvar configurações');
+      toast.error(error.response?.data?.error || 'Erro ao salvar configurações');
     } finally {
       setSaving(false);
     }

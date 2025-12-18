@@ -6,6 +6,7 @@ import productsRoutes from './routes/products.js'
 import categoriesRoutes from './routes/categories.js'
 import wishlistsRoutes from './routes/wishlists.js'
 import settingsRoutes from './routes/settings.js'
+import usersRoutes from './routes/users.js'
 
 const app = express()
 
@@ -65,6 +66,7 @@ app.use('/products', productsRoutes)
 app.use('/categories', categoriesRoutes)
 app.use('/wishlists', wishlistsRoutes)
 app.use('/settings', settingsRoutes)
+app.use('/users', usersRoutes)
 
 // 404 handler
 app.use((req, res) => {

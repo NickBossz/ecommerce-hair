@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Shield, ShieldOff, User, Pencil, Trash2, UserPlus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '@/services/supabase';
+import api from '@/services/api';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -27,15 +27,15 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('user_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await api.get('/users');
 
-      const { data, error } = await query;
+      // Convert _id to id for compatibility with existing UI code
+      const usersWithId = (response.data.users || []).map(user => ({
+        ...user,
+        id: user._id.toString()
+      }));
 
-      if (error) throw error;
-      setUsers(data || []);
+      setUsers(usersWithId);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       toast.error('Erro ao carregar usuários');
@@ -58,15 +58,10 @@ const Users = () => {
     e.preventDefault();
 
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: formData.full_name,
-          role: formData.role
-        })
-        .eq('id', editingUser.id);
-
-      if (error) throw error;
+      await api.put(`/users/${editingUser.id}`, {
+        full_name: formData.full_name,
+        role: formData.role
+      });
 
       toast.success('Usuário atualizado com sucesso!');
       setShowEditModal(false);
@@ -74,7 +69,7 @@ const Users = () => {
       fetchUsers();
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
-      toast.error('Erro ao atualizar usuário');
+      toast.error(error.response?.data?.error || 'Erro ao atualizar usuário');
     }
   };
 
@@ -82,18 +77,13 @@ const Users = () => {
     try {
       const newRole = currentRole === 'admin' ? 'customer' : 'admin';
 
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
-
-      if (error) throw error;
+      await api.put(`/users/${userId}`, { role: newRole });
 
       toast.success(`Usuário ${newRole === 'admin' ? 'promovido a' : 'removido de'} admin!`);
       fetchUsers();
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
-      toast.error('Erro ao atualizar permissões');
+      toast.error(error.response?.data?.error || 'Erro ao atualizar permissões');
     }
   };
 
@@ -101,18 +91,13 @@ const Users = () => {
     if (!confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) return;
 
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
+      await api.delete(`/users/${userId}`);
 
       toast.success('Usuário excluído com sucesso!');
       fetchUsers();
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
-      toast.error('Erro ao excluir usuário');
+      toast.error(error.response?.data?.error || 'Erro ao excluir usuário');
     }
   };
 
