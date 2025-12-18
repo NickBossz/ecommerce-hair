@@ -77,54 +77,54 @@ const HeroCarousel = () => {
 
   return (
     <div className="relative w-full overflow-hidden bg-gradient-hero">
-      <div className="relative h-[400px] md:h-[600px]">
+      <div className="relative h-[500px] md:h-[600px]">
         {products.map((product, index) => (
           <div
             key={product.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
+            onClick={() => handleProductClick(product.slug)}
           >
-            <div className="grid md:grid-cols-2 h-full">
-              {/* Text Content */}
-              <div className="flex flex-col justify-center px-6 md:px-12 lg:px-20 py-8 animate-fade-in">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 leading-tight">
+            {/* Product Image */}
+            <div className="relative w-full h-full cursor-pointer group">
+              <img
+                src={getPrimaryImage(product)}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+              {/* Product Info Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
+                <h2 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-lg">
                   {product.name}
-                </h1>
+                </h2>
 
-                <div className="mb-6">
+                <div className="flex items-center gap-4 mb-4">
                   {product.compare_at_price && (
-                    <p className="text-lg text-primary-foreground/70 line-through mb-2">
-                      De: R$ {product.compare_at_price.toFixed(2)}
-                    </p>
+                    <span className="text-lg md:text-xl text-white/80 line-through">
+                      R$ {product.compare_at_price.toFixed(2)}
+                    </span>
                   )}
-                  <p className="text-4xl md:text-5xl font-bold text-primary-foreground">
+                  <span className="text-3xl md:text-4xl font-bold">
                     R$ {product.price.toFixed(2)}
-                  </p>
-                  <p className="text-sm text-primary-foreground/80 mt-2">
-                    ou 3x de R$ {(product.price / 3).toFixed(2)}
-                  </p>
+                  </span>
                 </div>
 
-                <div>
-                  <Button
-                    variant="hero"
-                    size="xl"
-                    onClick={() => handleProductClick(product.slug)}
-                  >
-                    VER DETALHES
-                  </Button>
-                </div>
-              </div>
-
-              {/* Image */}
-              <div className="relative hidden md:block">
-                <img
-                  src={getPrimaryImage(product)}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                />
-                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-primary/20" />
+                <Button
+                  variant="hero"
+                  size="lg"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(product.slug);
+                  }}
+                >
+                  VER DETALHES
+                </Button>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ const HeroCarousel = () => {
             variant="ghost"
             size="icon"
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full h-12 w-12"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full h-12 w-12 backdrop-blur-sm z-10"
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
@@ -146,21 +146,21 @@ const HeroCarousel = () => {
             variant="ghost"
             size="icon"
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full h-12 w-12"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full h-12 w-12 backdrop-blur-sm z-10"
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
 
           {/* Dots Indicator */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {products.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-3 h-3 rounded-full transition-all ${
                   index === currentSlide
-                    ? "bg-primary-foreground w-8"
-                    : "bg-primary-foreground/50"
+                    ? "bg-white w-8"
+                    : "bg-white/50"
                 }`}
                 aria-label={`Ver produto ${index + 1}`}
               />
