@@ -157,8 +157,8 @@ db.site_settings.createIndex({ key: 1 }, { unique: true })
 **Default Settings:**
 ```javascript
 [
-  { key: "site_name", value: "FabHair" },
-  { key: "site_description", value: "Loja de produtos capilares" },
+  { key: "site_name", value: "ecommerce" },
+  { key: "site_description", value: "Loja online de produtos selecionados" },
   { key: "contact_email", value: "contato@fabhair.com" },
   { key: "contact_phone", value: "(11) 99999-9999" },
   { key: "whatsapp", value: "5511999999999" },
@@ -336,9 +336,9 @@ db.order_items.createIndex({ product_id: 1 })
 // Default categories
 db.categories.insertMany([
   {
-    name: "Shampoos",
-    slug: "shampoos",
-    description: "Shampoos profissionais para todos os tipos de cabelo",
+    name: "Eletrônicos",
+    slug: "eletronicos",
+    description: "Produtos eletrônicos e tecnologia",
     parent_id: null,
     display_order: 0,
     is_active: true,
@@ -346,9 +346,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Condicionadores",
-    slug: "condicionadores",
-    description: "Condicionadores hidratantes",
+    name: "Moda",
+    slug: "moda",
+    description: "Roupas, calçados e acessórios",
     parent_id: null,
     display_order: 1,
     is_active: true,
@@ -356,9 +356,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Máscaras",
-    slug: "mascaras",
-    description: "Tratamentos intensivos",
+    name: "Casa e Decoração",
+    slug: "casa-decoracao",
+    description: "Itens para casa e decoração",
     parent_id: null,
     display_order: 2,
     is_active: true,
@@ -366,9 +366,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Finalizadores",
-    slug: "finalizadores",
-    description: "Produtos para finalização",
+    name: "Esportes",
+    slug: "esportes",
+    description: "Artigos esportivos e fitness",
     parent_id: null,
     display_order: 3,
     is_active: true,

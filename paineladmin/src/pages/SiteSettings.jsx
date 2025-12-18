@@ -108,7 +108,7 @@ const SiteSettings = () => {
                   id="site_name"
                   value={settings.site_name || ''}
                   onChange={(e) => handleChange('site_name', e.target.value)}
-                  placeholder="FabHair"
+                  placeholder="ecommerce"
                 />
               </div>
               <div className="space-y-2">

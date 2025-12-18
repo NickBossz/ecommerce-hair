@@ -144,7 +144,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-border pt-6 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} {settings.site_name || "FabHair"}. Todos os direitos reservados.
+            © {new Date().getFullYear()} {settings.site_name || "ecommerce"}. Todos os direitos reservados.
           </p>
         </div>
       </div>

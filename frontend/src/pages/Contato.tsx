@@ -111,7 +111,7 @@ const Contato = () => {
                           href={`mailto:${settings.contact_email}`}
                           className="text-sm text-muted-foreground hover:text-primary transition-colors"
                         >
-                          {settings.contact_email || "contato@fabhair.com.br"}
+                          {settings.contact_email || "contato@ecommerce.com"}
                         </a>
                       </div>
                     </div>

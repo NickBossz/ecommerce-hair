@@ -99,9 +99,9 @@ Execute no MongoDB Compass ou mongosh:
 // Categorias padrão
 db.categories.insertMany([
   {
-    name: "Shampoos",
-    slug: "shampoos",
-    description: "Shampoos profissionais",
+    name: "Eletrônicos",
+    slug: "eletronicos",
+    description: "Produtos eletrônicos e tecnologia",
     parent_id: null,
     display_order: 0,
     is_active: true,
@@ -109,9 +109,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Condicionadores",
-    slug: "condicionadores",
-    description: "Condicionadores hidratantes",
+    name: "Moda",
+    slug: "moda",
+    description: "Roupas, calçados e acessórios",
     parent_id: null,
     display_order: 1,
     is_active: true,
@@ -119,9 +119,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Máscaras",
-    slug: "mascaras",
-    description: "Tratamentos intensivos",
+    name: "Casa e Decoração",
+    slug: "casa-decoracao",
+    description: "Itens para casa e decoração",
     parent_id: null,
     display_order: 2,
     is_active: true,
@@ -129,9 +129,9 @@ db.categories.insertMany([
     updated_at: new Date()
   },
   {
-    name: "Finalizadores",
-    slug: "finalizadores",
-    description: "Produtos para finalização",
+    name: "Esportes",
+    slug: "esportes",
+    description: "Artigos esportivos e fitness",
     parent_id: null,
     display_order: 3,
     is_active: true,
@@ -142,9 +142,9 @@ db.categories.insertMany([
 
 // Configurações do site
 db.site_settings.insertMany([
-  { key: "site_name", value: "FabHair", updated_at: new Date() },
-  { key: "site_description", value: "Loja de produtos capilares", updated_at: new Date() },
-  { key: "contact_email", value: "contato@fabhair.com", updated_at: new Date() },
+  { key: "site_name", value: "ecommerce", updated_at: new Date() },
+  { key: "site_description", value: "Loja online de produtos selecionados", updated_at: new Date() },
+  { key: "contact_email", value: "contato@ecommerce.com", updated_at: new Date() },
   { key: "contact_phone", value: "(11) 99999-9999", updated_at: new Date() },
   { key: "whatsapp", value: "5511999999999", updated_at: new Date() },
   { key: "address_street", value: "", updated_at: new Date() },

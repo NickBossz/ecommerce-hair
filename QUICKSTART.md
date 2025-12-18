@@ -1,4 +1,4 @@
-# Quick Start - E-commerce FabHair
+# Quick Start - E-commerce (Legacy Supabase Version)
 
 Guia rápido para colocar o projeto funcionando em minutos.
 

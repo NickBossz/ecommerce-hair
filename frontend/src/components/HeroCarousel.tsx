@@ -51,24 +51,24 @@ const HeroCarousel = () => {
       setSlides([
         {
           id: "1",
-          image: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=800",
-          title: "LACES E FRONTAIS",
-          description: "MODELOS SELECIONADOS COM DESCONTOS EXCLUSIVOS PARA REALÇAR A SUA BELEZA E AUTOESTIMA!",
-          categorySlug: "laces-frontais",
+          image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
+          title: "PRODUTOS EXCLUSIVOS",
+          description: "Descubra nossa seleção especial de produtos com qualidade garantida e os melhores preços!",
+          categorySlug: "todos",
         },
         {
           id: "2",
-          image: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800",
-          title: "PERUCAS",
-          description: "Transforme seu visual com nossas perucas de alta qualidade. Conforto e naturalidade garantidos!",
-          categorySlug: "perucas",
+          image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800",
+          title: "NOVIDADES",
+          description: "Confira os lançamentos mais recentes e fique por dentro das tendências!",
+          categorySlug: "novidades",
         },
         {
           id: "3",
-          image: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800",
-          title: "MEGA HAIR",
-          description: "Alongue e dê volume aos seus cabelos com nossos mega hairs premium. Qualidade incomparável!",
-          categorySlug: "mega-hair",
+          image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800",
+          title: "OFERTAS ESPECIAIS",
+          description: "Aproveite nossas promoções e garanta produtos incríveis com descontos exclusivos!",
+          categorySlug: "ofertas",
         },
       ]);
     } finally {
