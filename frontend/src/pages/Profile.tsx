@@ -11,7 +11,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Lock, Mail, Phone, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -91,25 +90,9 @@ const Profile = () => {
       return;
     }
 
-    setUpdating(true);
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: securityData.newPassword,
-      });
-
-      if (error) {
-        toast.error("Erro ao alterar senha: " + error.message);
-      } else {
-        toast.success("Senha alterada com sucesso!");
-        setSecurityData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      }
-    } catch (error) {
-      console.error("Erro ao alterar senha:", error);
-      toast.error("Erro ao alterar senha");
-    } finally {
-      setUpdating(false);
-    }
+    // TODO: Implement password update endpoint in backend
+    toast.info("Funcionalidade de alteração de senha será implementada em breve");
+    setSecurityData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
@@ -120,25 +103,9 @@ const Profile = () => {
       return;
     }
 
-    setUpdating(true);
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        email: emailData.newEmail,
-      });
-
-      if (error) {
-        toast.error("Erro ao alterar email: " + error.message);
-      } else {
-        toast.success("Email de confirmação enviado para o novo endereço!");
-        setEmailData({ newEmail: "", password: "" });
-      }
-    } catch (error) {
-      console.error("Erro ao alterar email:", error);
-      toast.error("Erro ao alterar email");
-    } finally {
-      setUpdating(false);
-    }
+    // TODO: Implement email update endpoint in backend
+    toast.info("Funcionalidade de alteração de email será implementada em breve");
+    setEmailData({ newEmail: "", password: "" });
   };
 
   const getInitials = () => {
