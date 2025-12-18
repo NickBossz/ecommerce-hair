@@ -5,6 +5,11 @@ import { requireAuth } from '../middleware.js'
 
 const router = express.Router()
 
+// Helper function to validate ObjectId
+function isValidObjectId(id) {
+  return ObjectId.isValid(id) && String(new ObjectId(id)) === id
+}
+
 // GET /wishlists - Get user's wishlist
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -43,6 +48,10 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Product ID is required' })
     }
 
+    if (!isValidObjectId(product_id)) {
+      return res.status(400).json({ error: 'Invalid product ID' })
+    }
+
     const wishlists = await getCollection('wishlists')
 
     // Check if already in wishlist
@@ -79,6 +88,11 @@ router.post('/', requireAuth, async (req, res) => {
 router.delete('/:product_id', requireAuth, async (req, res) => {
   try {
     const { product_id } = req.params
+
+    if (!isValidObjectId(product_id)) {
+      return res.status(400).json({ error: 'Invalid product ID' })
+    }
+
     const wishlists = await getCollection('wishlists')
 
     const result = await wishlists.deleteOne({

@@ -5,6 +5,11 @@ import { requireAuth, requireAdmin, optionalAuth } from '../middleware.js'
 
 const router = express.Router()
 
+// Helper function to validate ObjectId
+function isValidObjectId(id) {
+  return ObjectId.isValid(id) && String(new ObjectId(id)) === id
+}
+
 // GET /products - List products (public)
 router.get('/', optionalAuth, async (req, res) => {
   try {
@@ -85,8 +90,12 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params
-    const products = await getCollection('products')
 
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid product ID' })
+    }
+
+    const products = await getCollection('products')
     const query = { _id: new ObjectId(id) }
 
     // Only show active products to non-admin users
@@ -203,8 +212,12 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params
-    const updates = req.body
 
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid product ID' })
+    }
+
+    const updates = req.body
     const products = await getCollection('products')
 
     const updateData = {
@@ -240,6 +253,11 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid product ID' })
+    }
+
     const products = await getCollection('products')
 
     const result = await products.deleteOne({ _id: new ObjectId(id) })

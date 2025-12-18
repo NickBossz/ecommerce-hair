@@ -5,6 +5,11 @@ import { requireAuth, requireAdmin, optionalAuth } from '../middleware.js'
 
 const router = express.Router()
 
+// Helper function to validate ObjectId
+function isValidObjectId(id) {
+  return ObjectId.isValid(id) && String(new ObjectId(id)) === id
+}
+
 // GET /categories - List categories
 router.get('/', optionalAuth, async (req, res) => {
   try {
@@ -33,8 +38,12 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const categories = await getCollection('categories')
 
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid category ID' })
+    }
+
+    const categories = await getCollection('categories')
     const category = await categories.findOne({ _id: new ObjectId(id) })
 
     if (!category) {
@@ -92,6 +101,11 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid category ID' })
+    }
+
     const updates = req.body
 
     const categories = await getCollection('categories')
@@ -127,6 +141,11 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid category ID' })
+    }
+
     const categories = await getCollection('categories')
 
     const result = await categories.deleteOne({ _id: new ObjectId(id) })
