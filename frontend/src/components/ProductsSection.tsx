@@ -100,7 +100,7 @@ const ProductsSection = () => {
             Produtos em Destaque
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Descubra nossa seleção especial de laces, wigs e apliques premium
+            Descubra nossa seleção especial de produtos selecionados com qualidade garantida
           </p>
         </div>
 
