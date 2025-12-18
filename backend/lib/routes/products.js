@@ -242,10 +242,10 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       const productImages = await getCollection('product_images')
       const imageDocuments = images.map((img, index) => ({
         product_id: result.insertedId,
-        image_url: img.url,
-        alt_text: img.alt || name,
-        is_primary: index === 0,
-        display_order: index,
+        image_url: img.image_url || img.url,
+        alt_text: img.alt_text || img.alt || name,
+        is_primary: img.is_primary !== undefined ? img.is_primary : index === 0,
+        display_order: img.display_order !== undefined ? img.display_order : index,
         created_at: new Date()
       }))
       await productImages.insertMany(imageDocuments)
@@ -270,7 +270,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid product ID' })
     }
 
-    const updates = req.body
+    const { images, ...updates } = req.body
     const products = await getCollection('products')
 
     const updateData = {
@@ -293,6 +293,25 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Product not found' })
+    }
+
+    // Update images if provided
+    if (images && images.length > 0) {
+      const productImages = await getCollection('product_images')
+
+      // Delete old images
+      await productImages.deleteMany({ product_id: new ObjectId(id) })
+
+      // Insert new images
+      const imageDocuments = images.map((img, index) => ({
+        product_id: new ObjectId(id),
+        image_url: img.image_url || img.url,
+        alt_text: img.alt_text || img.alt || updateData.name || '',
+        is_primary: img.is_primary !== undefined ? img.is_primary : index === 0,
+        display_order: img.display_order !== undefined ? img.display_order : index,
+        created_at: new Date()
+      }))
+      await productImages.insertMany(imageDocuments)
     }
 
     res.json({ message: 'Product updated successfully' })
