@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '@/services/api';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -19,8 +19,6 @@ const Categories = () => {
     description: ''
   });
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -28,8 +26,15 @@ const Categories = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl}/categories`);
-      setCategories(response.data.categories || []);
+      const response = await api.get('/categories');
+
+      // Convert _id to id for compatibility
+      const categoriesWithId = (response.data || []).map(cat => ({
+        ...cat,
+        id: cat._id?.toString() || cat.id
+      }));
+
+      setCategories(categoriesWithId);
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
       toast.error('Erro ao carregar categorias');
@@ -43,10 +48,10 @@ const Categories = () => {
 
     try {
       if (editingCategory) {
-        await axios.put(`${apiUrl}/categories/${editingCategory.id}`, formData);
+        await api.put(`/categories/${editingCategory.id}`, formData);
         toast.success('Categoria atualizada com sucesso!');
       } else {
-        await axios.post(`${apiUrl}/categories`, formData);
+        await api.post('/categories', formData);
         toast.success('Categoria criada com sucesso!');
       }
 
@@ -56,7 +61,7 @@ const Categories = () => {
       fetchCategories();
     } catch (error) {
       console.error('Erro ao salvar categoria:', error);
-      toast.error(error.response?.data?.message || 'Erro ao salvar categoria');
+      toast.error(error.response?.data?.error || 'Erro ao salvar categoria');
     }
   };
 
@@ -74,12 +79,12 @@ const Categories = () => {
     if (!confirm('Tem certeza que deseja excluir esta categoria?')) return;
 
     try {
-      await axios.delete(`${apiUrl}/categories/${id}`);
+      await api.delete(`/categories/${id}`);
       toast.success('Categoria excluída com sucesso!');
       fetchCategories();
     } catch (error) {
       console.error('Erro ao excluir categoria:', error);
-      toast.error(error.response?.data?.message || 'Erro ao excluir categoria');
+      toast.error(error.response?.data?.error || 'Erro ao excluir categoria');
     }
   };
 
