@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/services/api';
 import { toast } from 'sonner';
 
 interface UserProfile {
@@ -8,16 +7,15 @@ interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
+  email: string;
   role: string;
 }
 
 interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
+  user: UserProfile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
 }
@@ -37,55 +35,27 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar sessão ativa ao carregar
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Escutar mudanças de autenticação
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Check for existing session on load
+    const token = localStorage.getItem('token');
+    if (token) {
+      loadCurrentUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  const loadUserProfile = async (userId: string) => {
+  const loadCurrentUser = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Erro ao carregar perfil:', error);
-      } else {
-        setProfile(data);
-      }
+      const { data } = await api.get('/auth/me');
+      setUser(data);
     } catch (error) {
-      console.error('Erro ao carregar perfil:', error);
+      console.error('Error loading user:', error);
+      localStorage.removeItem('token');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -95,61 +65,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setLoading(true);
 
-      // Criar usuário no Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      const { data } = await api.post('/auth/signup', {
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: window.location.origin,
-        },
+        full_name: fullName,
       });
 
-      if (error) {
-        console.error('Erro do Supabase auth.signUp:', error);
-        return { error };
-      }
-
-      // Verificar se o usuário foi criado
-      if (!data.user) {
-        return {
-          error: {
-            message: 'Erro ao criar usuário. Verifique as configurações de email no Supabase.',
-            name: 'SignUpError',
-            status: 400
-          } as AuthError
-        };
-      }
-
-      // Criar perfil do usuário
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert([
-          {
-            id: data.user.id,
-            full_name: fullName,
-            email: email,
-            role: 'customer',
-          },
-        ]);
-
-      if (profileError) {
-        console.error('Erro ao criar perfil:', profileError);
-        // Não retornar erro aqui pois o usuário já foi criado
-        // O perfil pode ser criado depois via trigger ou manualmente
-      }
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
 
       return { error: null };
     } catch (error: any) {
-      console.error('Erro no cadastro:', error);
+      console.error('Signup error:', error);
       return {
-        error: {
-          message: error?.message || 'Erro ao criar conta. Tente novamente.',
-          name: 'SignUpError',
-          status: error?.status || 500
-        } as AuthError
+        error: new Error(
+          error.response?.data?.error || 'Error creating account. Please try again.'
+        ),
       };
     } finally {
       setLoading(false);
@@ -159,15 +91,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+
+      const { data } = await api.post('/auth/login', {
         email,
         password,
       });
 
-      return { error };
-    } catch (error) {
-      console.error('Erro no login:', error);
-      return { error: error as AuthError };
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return {
+        error: new Error(
+          error.response?.data?.error || 'Invalid credentials'
+        ),
+      };
     } finally {
       setLoading(false);
     }
@@ -176,15 +117,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error('Erro ao fazer logout');
-      } else {
-        toast.success('Logout realizado com sucesso');
-      }
+      await api.post('/auth/logout');
+      localStorage.removeItem('token');
+      setUser(null);
+      toast.success('Logged out successfully');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-      toast.error('Erro ao fazer logout');
+      console.error('Logout error:', error);
+      // Still clear local data even if API call fails
+      localStorage.removeItem('token');
+      setUser(null);
+      toast.error('Error logging out');
     } finally {
       setLoading(false);
     }
@@ -192,21 +134,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!user) {
-      return { error: new Error('Usuário não autenticado') };
+      return { error: new Error('User not authenticated') };
     }
 
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update(data)
-        .eq('id', user.id);
-
-      if (error) {
-        return { error };
-      }
-
-      // Recarregar perfil
-      await loadUserProfile(user.id);
+      // TODO: Implement profile update endpoint
+      // For now, just update local state
+      setUser({ ...user, ...data });
       return { error: null };
     } catch (error) {
       return { error: error as Error };
@@ -215,8 +149,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const value = {
     user,
-    profile,
-    session,
     loading,
     signUp,
     signIn,

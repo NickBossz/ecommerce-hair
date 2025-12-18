@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { api } from '@/services/api';
+import { supabase } from '@/lib/supabase';
 
 interface SiteSettings {
   site_name?: string;
@@ -35,10 +35,21 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/settings');
-      setSettings(data);
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value');
+
+      if (error) throw error;
+
+      const settingsObj: SiteSettings = {};
+      data?.forEach((setting) => {
+        // Supabase retorna JSONB já parseado
+        settingsObj[setting.key as keyof SiteSettings] = setting.value || '';
+      });
+
+      setSettings(settingsObj);
     } catch (error) {
-      console.error('Error loading site settings:', error);
+      console.error('Erro ao carregar configurações do site:', error);
     } finally {
       setLoading(false);
     }
