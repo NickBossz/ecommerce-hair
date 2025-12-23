@@ -47,7 +47,8 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState<string>("");
   const [showFilters, setShowFilters] = useState(true);
 
@@ -77,7 +78,16 @@ const Shop = () => {
       if (categoryQuery) params.append('category', categoryQuery);
       const queryString = params.toString() ? `?${params.toString()}` : '';
       const response = await api.get(`/products${queryString}`);
-      setProducts(response.data.products || []);
+      const productsData = response.data.products || [];
+      setProducts(productsData);
+
+      // Calculate max price from products
+      if (productsData.length > 0) {
+        const calculatedMaxPrice = Math.max(...productsData.map((p: Product) => p.price));
+        const roundedMaxPrice = Math.ceil(calculatedMaxPrice / 100) * 100; // Round up to nearest 100
+        setMaxPrice(roundedMaxPrice);
+        setPriceRange([0, roundedMaxPrice]);
+      }
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
       setError(true);
@@ -134,7 +144,7 @@ const Shop = () => {
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([0, 1000]);
+    setPriceRange([0, maxPrice]);
     setSortBy("");
   };
 
@@ -225,7 +235,7 @@ const Shop = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-bold text-foreground">Filtros</h2>
-                    {(selectedCategories.length > 0 || priceRange[0] !== 0 || priceRange[1] !== 1000 || sortBy) && (
+                    {(selectedCategories.length > 0 || priceRange[0] !== 0 || priceRange[1] !== maxPrice || sortBy) && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -272,7 +282,7 @@ const Shop = () => {
                       <Slider
                         value={priceRange}
                         onValueChange={(value) => setPriceRange(value as [number, number])}
-                        max={1000}
+                        max={maxPrice}
                         step={10}
                         className="w-full"
                       />
