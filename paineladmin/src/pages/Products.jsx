@@ -620,8 +620,8 @@ const Products = () => {
       ) : (
         <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden">
-              <CardHeader className="p-3">
+            <Card key={product.id} className="overflow-hidden flex flex-col">
+              <CardHeader className="p-3 flex-shrink-0">
                 {product.images?.[0]?.image_url ? (
                   <div className="aspect-square w-full rounded-md overflow-hidden mb-2">
                     <img
@@ -635,13 +635,13 @@ const Products = () => {
                     <ImageIcon className="h-8 w-8 text-muted-foreground" />
                   </div>
                 )}
-                <CardTitle className="text-sm line-clamp-2">{product.name}</CardTitle>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-sm font-bold text-primary">
+                <CardTitle className="text-sm line-clamp-2 break-words">{product.name}</CardTitle>
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  <span className="text-sm font-bold text-primary whitespace-nowrap">
                     R$ {product.price.toFixed(2)}
                   </span>
                   {product.compare_at_price && (
-                    <span className="text-xs text-muted-foreground line-through">
+                    <span className="text-xs text-muted-foreground line-through whitespace-nowrap">
                       R$ {product.compare_at_price.toFixed(2)}
                     </span>
                   )}
