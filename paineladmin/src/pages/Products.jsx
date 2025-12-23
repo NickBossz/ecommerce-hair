@@ -436,11 +436,11 @@ const Products = () => {
                         <img
                           src={img.image_url}
                           alt={img.alt_text}
-                          className="w-16 h-16 object-cover rounded"
+                          className="w-16 h-16 object-cover rounded flex-shrink-0"
                           onError={(e) => e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'}
                         />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{img.image_url}</p>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium truncate break-all" title={img.image_url}>{img.image_url}</p>
                           {img.is_primary && (
                             <span className="text-xs text-primary flex items-center gap-1">
                               <Star className="h-3 w-3 fill-current" />
@@ -523,10 +523,10 @@ const Products = () => {
                   <div className="grid gap-2">
                     {formData.videos.map((vid, index) => (
                       <div key={index} className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
-                        <Video className="h-8 w-8 text-muted-foreground" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{vid.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{vid.video_url}</p>
+                        <Video className="h-8 w-8 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium truncate break-all" title={vid.title}>{vid.title}</p>
+                          <p className="text-xs text-muted-foreground truncate break-all" title={vid.video_url}>{vid.video_url}</p>
                         </div>
                         <div className="flex gap-1">
                           <Button
