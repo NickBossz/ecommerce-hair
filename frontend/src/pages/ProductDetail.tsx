@@ -17,6 +17,13 @@ interface ProductImage {
   is_primary: boolean;
 }
 
+interface ProductVideo {
+  id: string;
+  video_url: string;
+  title?: string;
+  display_order: number;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -28,6 +35,7 @@ interface Product {
   stock_quantity: number;
   is_featured: boolean;
   images: ProductImage[];
+  videos?: ProductVideo[];
   category?: {
     id: string;
     name: string;
@@ -42,6 +50,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedMediaType, setSelectedMediaType] = useState<'image' | 'video'>('image');
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -83,6 +93,23 @@ const ProductDetail = () => {
       return Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100);
     }
     return 0;
+  };
+
+  const getEmbedUrl = (url: string) => {
+    // YouTube
+    const youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+
+    // Se já for um embed URL, retorna como está
+    return url;
   };
 
   if (loading) {
@@ -154,15 +181,27 @@ const ProductDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Product Images */}
+            {/* Product Images & Videos */}
             <div className="space-y-4">
               <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                <img
-                  src={sortedImages[selectedImage]?.image_url || primaryImage?.image_url}
-                  alt={sortedImages[selectedImage]?.alt_text || product.name}
-                  className="w-full h-full object-cover"
-                />
-                {getDiscount() > 0 && (
+                {selectedMediaType === 'image' ? (
+                  <img
+                    src={sortedImages[selectedImage]?.image_url || primaryImage?.image_url}
+                    alt={sortedImages[selectedImage]?.alt_text || product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  product.videos && product.videos.length > 0 && (
+                    <iframe
+                      src={getEmbedUrl(product.videos[selectedVideoIndex]?.video_url)}
+                      title={product.videos[selectedVideoIndex]?.title || product.name}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  )
+                )}
+                {getDiscount() > 0 && selectedMediaType === 'image' && (
                   <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground">
                     {getDiscount()}% OFF
                   </Badge>
@@ -170,14 +209,17 @@ const ProductDetail = () => {
               </div>
 
               {/* Thumbnail Gallery */}
-              {sortedImages.length > 1 && (
+              {(sortedImages.length > 0 || (product.videos && product.videos.length > 0)) && (
                 <div className="grid grid-cols-4 gap-2">
                   {sortedImages.map((image, index) => (
                     <button
                       key={image.id}
-                      onClick={() => setSelectedImage(index)}
+                      onClick={() => {
+                        setSelectedMediaType('image');
+                        setSelectedImage(index);
+                      }}
                       className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
-                        selectedImage === index ? 'border-primary' : 'border-transparent hover:border-border'
+                        selectedMediaType === 'image' && selectedImage === index ? 'border-primary' : 'border-transparent hover:border-border'
                       }`}
                     >
                       <img
@@ -185,6 +227,25 @@ const ProductDetail = () => {
                         alt={image.alt_text || `${product.name} ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                    </button>
+                  ))}
+                  {product.videos?.map((video, index) => (
+                    <button
+                      key={video.id}
+                      onClick={() => {
+                        setSelectedMediaType('video');
+                        setSelectedVideoIndex(index);
+                      }}
+                      className={`aspect-square overflow-hidden rounded-lg border-2 transition-all bg-black flex items-center justify-center ${
+                        selectedMediaType === 'video' && selectedVideoIndex === index ? 'border-primary' : 'border-transparent hover:border-border'
+                      }`}
+                    >
+                      <div className="text-white text-center p-2">
+                        <svg className="w-8 h-8 mx-auto mb-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                        </svg>
+                        <span className="text-xs">Vídeo {index + 1}</span>
+                      </div>
                     </button>
                   ))}
                 </div>

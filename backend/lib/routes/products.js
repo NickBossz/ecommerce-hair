@@ -45,13 +45,19 @@ router.get('/', optionalAuth, async (req, res) => {
       .limit(parseInt(limit))
       .toArray()
 
-    // Get product images and categories
+    // Get product images, videos and categories
     const productImages = await getCollection('product_images')
+    const productVideos = await getCollection('product_videos')
     const categories = await getCollection('categories')
 
     const enrichedProducts = await Promise.all(
       productsList.map(async (product) => {
         const images = await productImages
+          .find({ product_id: product._id })
+          .sort({ display_order: 1 })
+          .toArray()
+
+        const videos = await productVideos
           .find({ product_id: product._id })
           .sort({ display_order: 1 })
           .toArray()
@@ -63,6 +69,7 @@ router.get('/', optionalAuth, async (req, res) => {
         return {
           ...product,
           images,
+          videos,
           category: category ? {
             id: category._id,
             name: category.name,
@@ -105,9 +112,15 @@ router.get('/slug/:slug', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' })
     }
 
-    // Get images
+    // Get images and videos
     const productImages = await getCollection('product_images')
     const images = await productImages
+      .find({ product_id: product._id })
+      .sort({ display_order: 1 })
+      .toArray()
+
+    const productVideos = await getCollection('product_videos')
+    const videos = await productVideos
       .find({ product_id: product._id })
       .sort({ display_order: 1 })
       .toArray()
@@ -125,6 +138,10 @@ router.get('/slug/:slug', optionalAuth, async (req, res) => {
         images: images.map(img => ({
           ...img,
           id: img._id
+        })),
+        videos: videos.map(vid => ({
+          ...vid,
+          id: vid._id
         })),
         category: category ? {
           id: category._id,
@@ -162,9 +179,15 @@ router.get('/:id', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' })
     }
 
-    // Get images
+    // Get images and videos
     const productImages = await getCollection('product_images')
     const images = await productImages
+      .find({ product_id: product._id })
+      .sort({ display_order: 1 })
+      .toArray()
+
+    const productVideos = await getCollection('product_videos')
+    const videos = await productVideos
       .find({ product_id: product._id })
       .sort({ display_order: 1 })
       .toArray()
@@ -178,6 +201,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     res.json({
       ...product,
       images,
+      videos,
       category: category ? {
         id: category._id,
         name: category.name,
@@ -204,7 +228,8 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       category_id,
       is_featured,
       is_active,
-      images
+      images,
+      videos
     } = req.body
 
     if (!name || !slug || !description || price === undefined) {
@@ -251,6 +276,19 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       await productImages.insertMany(imageDocuments)
     }
 
+    // Add videos if provided
+    if (videos && videos.length > 0) {
+      const productVideos = await getCollection('product_videos')
+      const videoDocuments = videos.map((vid, index) => ({
+        product_id: result.insertedId,
+        video_url: vid.video_url || vid.url,
+        title: vid.title || name,
+        display_order: vid.display_order !== undefined ? vid.display_order : index,
+        created_at: new Date()
+      }))
+      await productVideos.insertMany(videoDocuments)
+    }
+
     res.status(201).json({
       id: result.insertedId,
       ...newProduct
@@ -270,7 +308,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid product ID' })
     }
 
-    const { images, ...updates } = req.body
+    const { images, videos, ...updates } = req.body
     const products = await getCollection('products')
 
     const updateData = {
@@ -314,6 +352,24 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       await productImages.insertMany(imageDocuments)
     }
 
+    // Update videos if provided
+    if (videos && videos.length > 0) {
+      const productVideos = await getCollection('product_videos')
+
+      // Delete old videos
+      await productVideos.deleteMany({ product_id: new ObjectId(id) })
+
+      // Insert new videos
+      const videoDocuments = videos.map((vid, index) => ({
+        product_id: new ObjectId(id),
+        video_url: vid.video_url || vid.url,
+        title: vid.title || updateData.name || '',
+        display_order: vid.display_order !== undefined ? vid.display_order : index,
+        created_at: new Date()
+      }))
+      await productVideos.insertMany(videoDocuments)
+    }
+
     res.json({ message: 'Product updated successfully' })
   } catch (error) {
     console.error('Update product error:', error)
@@ -338,9 +394,12 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' })
     }
 
-    // Delete associated images
+    // Delete associated images and videos
     const productImages = await getCollection('product_images')
     await productImages.deleteMany({ product_id: new ObjectId(id) })
+
+    const productVideos = await getCollection('product_videos')
+    await productVideos.deleteMany({ product_id: new ObjectId(id) })
 
     res.json({ message: 'Product deleted successfully' })
   } catch (error) {

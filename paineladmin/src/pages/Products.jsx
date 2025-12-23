@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, Search, Image as ImageIcon, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Image as ImageIcon, Upload, Star, ArrowUp, ArrowDown, Video, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
 
@@ -24,8 +24,12 @@ const Products = () => {
     stock_quantity: '',
     category_id: '',
     is_featured: false,
-    image_url: ''
+    images: [],
+    videos: []
   });
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [newVideoTitle, setNewVideoTitle] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -78,11 +82,8 @@ const Products = () => {
         price: parseFloat(formData.price),
         compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
-        images: formData.image_url ? [{
-          image_url: formData.image_url,
-          is_primary: true,
-          display_order: 0
-        }] : []
+        images: formData.images,
+        videos: formData.videos
       };
 
       if (editingProduct) {
@@ -115,7 +116,8 @@ const Products = () => {
       stock_quantity: product.stock_quantity.toString(),
       category_id: product.category_id || '',
       is_featured: product.is_featured,
-      image_url: product.images?.[0]?.image_url || ''
+      images: product.images || [],
+      videos: product.videos || []
     });
     setShowForm(true);
   };
@@ -155,7 +157,132 @@ const Products = () => {
       stock_quantity: '',
       category_id: '',
       is_featured: false,
-      image_url: ''
+      images: [],
+      videos: []
+    });
+    setNewImageUrl('');
+    setNewVideoUrl('');
+    setNewVideoTitle('');
+  };
+
+  const handleAddImage = () => {
+    if (!newImageUrl.trim()) {
+      toast.error('Digite uma URL válida para a imagem');
+      return;
+    }
+
+    const newImage = {
+      image_url: newImageUrl,
+      alt_text: formData.name || 'Imagem do produto',
+      is_primary: formData.images.length === 0,
+      display_order: formData.images.length
+    };
+
+    setFormData({
+      ...formData,
+      images: [...formData.images, newImage]
+    });
+    setNewImageUrl('');
+    toast.success('Imagem adicionada!');
+  };
+
+  const handleRemoveImage = (index) => {
+    const updatedImages = formData.images.filter((_, i) => i !== index);
+    // Reajustar display_order e is_primary
+    const reorderedImages = updatedImages.map((img, i) => ({
+      ...img,
+      display_order: i,
+      is_primary: i === 0
+    }));
+    setFormData({
+      ...formData,
+      images: reorderedImages
+    });
+    toast.success('Imagem removida!');
+  };
+
+  const handleSetPrimaryImage = (index) => {
+    const updatedImages = formData.images.map((img, i) => ({
+      ...img,
+      is_primary: i === index
+    }));
+    setFormData({
+      ...formData,
+      images: updatedImages
+    });
+    toast.success('Imagem principal definida!');
+  };
+
+  const handleMoveImage = (index, direction) => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= formData.images.length) return;
+
+    const updatedImages = [...formData.images];
+    [updatedImages[index], updatedImages[newIndex]] = [updatedImages[newIndex], updatedImages[index]];
+
+    // Atualizar display_order
+    const reorderedImages = updatedImages.map((img, i) => ({
+      ...img,
+      display_order: i
+    }));
+
+    setFormData({
+      ...formData,
+      images: reorderedImages
+    });
+  };
+
+  const handleAddVideo = () => {
+    if (!newVideoUrl.trim()) {
+      toast.error('Digite uma URL válida para o vídeo');
+      return;
+    }
+
+    const newVideo = {
+      video_url: newVideoUrl,
+      title: newVideoTitle || formData.name || 'Vídeo do produto',
+      display_order: formData.videos.length
+    };
+
+    setFormData({
+      ...formData,
+      videos: [...formData.videos, newVideo]
+    });
+    setNewVideoUrl('');
+    setNewVideoTitle('');
+    toast.success('Vídeo adicionado!');
+  };
+
+  const handleRemoveVideo = (index) => {
+    const updatedVideos = formData.videos.filter((_, i) => i !== index);
+    // Reajustar display_order
+    const reorderedVideos = updatedVideos.map((vid, i) => ({
+      ...vid,
+      display_order: i
+    }));
+    setFormData({
+      ...formData,
+      videos: reorderedVideos
+    });
+    toast.success('Vídeo removido!');
+  };
+
+  const handleMoveVideo = (index, direction) => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= formData.videos.length) return;
+
+    const updatedVideos = [...formData.videos];
+    [updatedVideos[index], updatedVideos[newIndex]] = [updatedVideos[newIndex], updatedVideos[index]];
+
+    // Atualizar display_order
+    const reorderedVideos = updatedVideos.map((vid, i) => ({
+      ...vid,
+      display_order: i
+    }));
+
+    setFormData({
+      ...formData,
+      videos: reorderedVideos
     });
   };
 
@@ -266,32 +393,173 @@ const Products = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="category_id">Categoria</Label>
-                  <select
-                    id="category_id"
-                    value={formData.category_id}
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL da Imagem</Label>
+              <div className="space-y-2">
+                <Label htmlFor="category_id">Categoria</Label>
+                <select
+                  id="category_id"
+                  value={formData.category_id}
+                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Imagens Section */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Imagens do Produto
+                </Label>
+
+                <div className="flex gap-2">
                   <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="Cole a URL da imagem aqui"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
                   />
+                  <Button type="button" onClick={handleAddImage} variant="outline">
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
+
+                {formData.images.length > 0 && (
+                  <div className="grid gap-2">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+                        <img
+                          src={img.image_url}
+                          alt={img.alt_text}
+                          className="w-16 h-16 object-cover rounded"
+                          onError={(e) => e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{img.image_url}</p>
+                          {img.is_primary && (
+                            <span className="text-xs text-primary flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-current" />
+                              Principal
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          {!img.is_primary && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSetPrimaryImage(index)}
+                              title="Definir como principal"
+                            >
+                              <Star className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveImage(index, 'up')}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveImage(index, 'down')}
+                            disabled={index === formData.images.length - 1}
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveImage(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Videos Section */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Vídeos do Produto
+                </Label>
+
+                <div className="space-y-2">
+                  <Input
+                    value={newVideoUrl}
+                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                    placeholder="Cole a URL do vídeo (YouTube, Vimeo, etc)"
+                    onKeyPress={(e) => e.key === 'Enter' && e.shiftKey && (e.preventDefault(), handleAddVideo())}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={newVideoTitle}
+                      onChange={(e) => setNewVideoTitle(e.target.value)}
+                      placeholder="Título do vídeo (opcional)"
+                    />
+                    <Button type="button" onClick={handleAddVideo} variant="outline">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {formData.videos.length > 0 && (
+                  <div className="grid gap-2">
+                    {formData.videos.map((vid, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+                        <Video className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{vid.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{vid.video_url}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveVideo(index, 'up')}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveVideo(index, 'down')}
+                            disabled={index === formData.videos.length - 1}
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveVideo(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center space-x-2">
